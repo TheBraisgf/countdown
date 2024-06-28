@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cuenta Regresiva</title>
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+      }
+      .content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+        max-width: 600px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+      .countdown {
+        font-size: 2em;
+        color: #333;
+        margin-bottom: 20px;
+      }
+      .message {
+        font-size: 1.5em;
+        margin-bottom: 20px;
+      }
+      .buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 1em;
+      }
+      footer {
+        text-align: center;
+        font-size: 0.8em;
+        color: #000;
+        width: 100%;
+        padding: 10px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="content">
+      <div class="message" id="message"></div>
+      <div class="countdown">
+        <p id="countdown"></p>
+      </div>
+      <div class="buttons" id="button-container">
+        <button onclick="setTargetTime(18, 0)">A las 18:00</button>
+        <button onclick="setTargetTime(17, 50)">A las 17:50</button>
+      </div>
+    </div>
+    <!-- Checkbox para simular que es martes -->
+    <label>
+      <input
+        type="checkbox"
+        id="simulateTuesday"
+        onchange="updateDaySimulation()"
+      />
+      Simular martes
+    </label>
+    <!-- Footer -->
+    <footer>&copy; Braisgf 2024</footer>
+    <script>
+      let target = new Date();
+      let simulateTuesday = false; // Variable para simular que es martes
+
+      // Función para establecer la hora objetivo
+      function setTargetTime(hours, minutes) {
+        target = new Date();
+        target.setHours(hours, minutes, 0, 0);
+        if (new Date() > target) {
+          target.setDate(target.getDate() + 1); // Ajusta la fecha si ya ha pasado la hora objetivo
+        }
+        updateCountdown();
+        updateMessage();
+      }
+
+      // Función para actualizar la cuenta regresiva
+      function updateCountdown() {
+        const now = new Date();
+        const diff = target - now;
+
+        if (diff <= 0) {
+          // Cuando el contador llega a cero
+          document.getElementById("message").textContent =
+            getRandomRestMessage();
+          return;
+        }
+
+        const hours = Math.floor(
+          (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById(
+          "countdown"
+        ).innerHTML = `${hours}h ${minutes}m ${seconds}s`;
+
+        // Actualiza la cuenta regresiva cada segundo
+        setTimeout(updateCountdown, 1000);
+      }
+
+      // Función para verificar si es viernes
+      function isFriday() {
+        const now = new Date();
+        return simulateTuesday ? false : now.getDay() === 5; // 5 es el código para viernes en JavaScript (0: domingo, 1: lunes, ..., 6: sábado)
+      }
+
+      // Función para generar mensajes aleatorios de ánimo
+      function getRandomMessage() {
+        const messages = [
+          "¡Ánimo! 😊",
+          "¡Tú puedes! 💪",
+          "¡Vamos allá! 🚀",
+          "¡A por todas! 🎯",
+          "¡No te rindas! 🔥",
+          "¡Sonríe! 😄",
+          "¡Hoy será un gran día! 🌟",
+          "¡Sigue adelante! 🌈",
+        ];
+        return messages[Math.floor(Math.random() * messages.length)];
+      }
+
+      // Función para generar mensajes aleatorios de descanso
+      function getRandomRestMessage() {
+        const messages = [
+          "¡Es hora de descansar! 💤",
+          "¡Desconecta y relájate! 🌴",
+          "¡Date un merecido descanso! 🛋️",
+          "¡Tiempo para ti! 🎶",
+          "¡Relájate y recupera energías! ☕",
+        ];
+        return messages[Math.floor(Math.random() * messages.length)];
+      }
+
+      // Función para actualizar el mensaje según el día de la semana
+      function updateMessage() {
+        const messageElement = document.getElementById("message");
+        const now = new Date();
+        const today = simulateTuesday ? 2 : now.getDay(); // Si simulateTuesday es true, simula que es martes
+
+        if (isFriday()) {
+          messageElement.textContent = "¡Es viernes! 🎉";
+          document.getElementById("button-container").style.display = "none"; // Oculta los botones de horas fijas
+        } else {
+          const daysUntilFriday = (5 - today + 7) % 7; // Calcula los días restantes para el viernes
+          const dayNames = [
+            "Domingo",
+            "Lunes",
+            "Martes",
+            "Miércoles",
+            "Jueves",
+            "Viernes",
+            "Sábado",
+          ];
+          const todayName = dayNames[today];
+          const randomMessage = getRandomMessage();
+          messageElement.textContent = `${randomMessage} Hoy es ${todayName}. Quedan ${daysUntilFriday} días para el viernes`;
+          document.getElementById("button-container").style.display = "flex"; // Muestra los botones de horas fijas
+        }
+      }
+
+      // Función para actualizar la simulación de martes
+      function updateDaySimulation() {
+        simulateTuesday = document.getElementById("simulateTuesday").checked;
+        updateMessage();
+      }
+
+      // Verifica si es viernes y ajusta la cuenta regresiva automáticamente
+      if (isFriday()) {
+        // Ajusta la cuenta regresiva para las 14:30 si es viernes
+        setTargetTime(14, 30);
+      } else {
+        // Inicia la cuenta regresiva a las 18:00 por defecto si no es viernes
+        setTargetTime(18, 0);
+      }
+    </script>
+  </body>
+</html>
